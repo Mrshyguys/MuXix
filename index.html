@@ -1,1 +1,994 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0d0d12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>My Music</title>
+<style>
+:root{--bg:#0d0d12;--card:#17171f;--card2:#22222c;--line:#2c2c38;--txt:#f3f3f6;--sub:#8e8e9c;--acc:#7c5cff;--acc2:#ff4f9a;--ok:#35d07f;--sp:#1ed760}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Thai",sans-serif}
+body{padding:calc(env(safe-area-inset-top) + 14px) 14px calc(env(safe-area-inset-bottom) + 200px)}
+button{font:inherit;color:inherit;border:none;background:none;cursor:pointer}
+input{font:inherit;font-size:16px}
+header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+h1{font-size:26px;font-weight:800;background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.tabs{position:sticky;top:0;z-index:5;display:flex;gap:4px;padding:4px;margin-bottom:14px;background:var(--card);border-radius:14px;box-shadow:0 4px 14px #0006}
+.tabs button{flex:1;padding:10px 2px;border-radius:10px;font-size:13px;color:var(--sub)}
+.tabs button.on{background:var(--card2);color:var(--txt);font-weight:600}
+.page{display:none}.page.on{display:block;animation:fade .25s}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border-radius:16px;padding:14px;margin-bottom:12px}
+.field{width:100%;padding:12px 14px;margin-bottom:8px;border-radius:12px;border:1px solid var(--line);background:var(--card2);color:var(--txt);outline:none}
+.field:focus{border-color:var(--acc)}
+.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}
+.row .field{margin:0;flex:3}
+.btn{display:block;padding:12px;border-radius:12px;font-weight:600;text-align:center;transition:transform .1s}
+a.btn{text-decoration:none;color:var(--txt)}
+.btn.pri{background:linear-gradient(90deg,var(--acc),var(--acc2));color:#fff}
+.btn.sec{background:var(--card2)}
+.btn.sp{background:var(--sp);color:#000}
+.btn:active,.icon:active,.item:active{transform:scale(.97)}
+.hint{color:var(--sub);font-size:12px;line-height:1.6;margin-top:6px}
+.item{display:flex;align-items:center;gap:12px;padding:10px;margin-bottom:6px;border-radius:14px;background:var(--card);transition:transform .1s}
+.item.active{background:linear-gradient(90deg,#7c5cff40,var(--card));box-shadow:inset 3px 0 var(--acc)}
+.art{position:relative;overflow:hidden;width:48px;height:48px;flex-shrink:0;border-radius:10px;display:grid;place-items:center;font-weight:700;font-size:18px;color:#fff;background:var(--card2)}
+.art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.meta{flex:1;min-width:0}
+.meta b,.meta small{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.meta b{font-size:15px;font-weight:600}
+.meta small{margin-top:3px;font-size:12px;color:var(--sub)}
+.badge{margin-left:6px;padding:1px 6px;border-radius:6px;font-size:10px;background:#35d07f22;color:var(--ok)}
+.sp-dot{color:var(--sp)}
+.icon{width:38px;height:38px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;font-size:16px;background:var(--card2)}
+.icon.ghost{background:none}
+.pct{min-width:48px;font-size:12px;color:var(--acc);text-align:center}
+.tracks{margin:0 0 10px 14px;padding-left:10px;border-left:2px solid var(--line)}
+.tracks .item{padding:8px;background:var(--card2)}
+.tracks .icon{background:var(--card)}
+.empty{padding:36px 10px;text-align:center;color:var(--sub);font-size:14px;line-height:1.7}
+.sp-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.sp-head b{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#spBox iframe{display:block;width:100%;height:380px;border:0;border-radius:12px}
+.player{position:fixed;left:8px;right:8px;bottom:calc(env(safe-area-inset-bottom) + 8px);z-index:10;padding:12px 14px 10px;border-radius:20px;background:rgba(28,28,38,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);box-shadow:0 10px 30px #000a}
+.p-top{display:flex;align-items:center;gap:12px}
+#seek{-webkit-appearance:none;appearance:none;width:100%;height:4px;margin:12px 0 4px;border-radius:4px;outline:none;background:linear-gradient(to right,var(--acc) var(--p,0%),#3a3a48 var(--p,0%))}
+#seek::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 0 6px #0008}
+#seek::-moz-range-thumb{width:14px;height:14px;border:none;border-radius:50%;background:#fff}
+#seek:disabled{opacity:.4}
+.time{display:flex;justify-content:space-between;font-size:11px;color:var(--sub)}
+.ctrl{display:flex;align-items:center;justify-content:space-between;margin-top:6px;padding:0 6px}
+.ctrl .icon{background:none;font-size:20px;width:44px;height:44px}
+.ctrl .play{width:56px;height:56px;font-size:24px;background:linear-gradient(135deg,var(--acc),var(--acc2))}
+.ctrl .on{background:#7c5cff55}
+.ctrl .dim{opacity:.4}
+.sheet{position:fixed;inset:0;z-index:20;display:flex;align-items:flex-end;background:#000a}
+.sheet[hidden]{display:none}
+.sheet-box{width:100%;display:flex;flex-direction:column;gap:8px;padding:18px 16px calc(env(safe-area-inset-bottom) + 16px);border-radius:22px 22px 0 0;background:var(--card);animation:up .2s}
+@keyframes up{from{transform:translateY(100%)}to{transform:none}}
+.sheet-box b{padding:0 4px 6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.sheet-box .btn{text-align:left}
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 12px);z-index:30;max-width:90%;padding:10px 16px;border-radius:12px;background:#2d2d3a;font-size:14px;box-shadow:0 6px 20px #000a;opacity:0;pointer-events:none;transform:translate(-50%,-10px);transition:.25s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
 
+<header><h1>🎧 My Music</h1><span id="count" class="hint"></span></header>
+
+<nav class="tabs">
+  <button class="on" data-act="tab" data-tab="lib">🎵 คลัง</button>
+  <button data-act="tab" data-tab="online">🔍 ออนไลน์</button>
+  <button data-act="tab" data-tab="off">⬇️ ออฟไลน์</button>
+  <button data-act="tab" data-tab="sp">🟢 Spotify</button>
+</nav>
+
+<!-- แท็บคลังเพลง -->
+<section id="p-lib" class="page on">
+  <form class="card" id="addForm" novalidate>
+    <input class="field" id="url" type="text" inputmode="url" autocomplete="off" placeholder="วางลิงก์ mp3 / Google Drive / Dropbox / Spotify">
+    <input class="field" id="name" type="text" autocomplete="off" placeholder="ชื่อเพลง (ไม่ใส่ก็ได้)">
+    <div class="row">
+      <button class="btn pri" type="submit">＋ เพิ่มลิงก์</button>
+      <label class="btn sec">📁 ไฟล์ในเครื่อง
+        <input id="fileIn" type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.flac" multiple hidden>
+      </label>
+    </div>
+  </form>
+  <input class="field" id="filter" type="search" placeholder="🔎 ค้นหาในคลังเพลง...">
+  <div id="libList"></div>
+</section>
+
+<!-- แท็บค้นหาออนไลน์ -->
+<section id="p-online" class="page">
+  <form class="card" id="searchForm">
+    <div class="row">
+      <input class="field" id="q" type="search" placeholder="ชื่อเพลง ศิลปิน แนวเพลง...">
+      <button class="btn pri" type="submit">ค้นหา</button>
+    </div>
+    <p class="hint">ค้นจาก Internet Archive (เพลงฟรีถูกกฎหมาย: Public Domain / Creative Commons)<br>แตะอัลบั้มเพื่อดูเพลง • ▶ ฟัง • ＋ เพิ่มเข้าคลัง • ⬇ โหลดไว้ฟังออฟไลน์</p>
+  </form>
+  <div id="results"><div class="empty">ลองค้นคำว่า <b>jazz</b>, <b>lofi</b>, <b>piano</b>, <b>classical</b></div></div>
+</section>
+
+<!-- แท็บออฟไลน์ -->
+<section id="p-off" class="page">
+  <div class="card"><b>เพลงที่โหลดเก็บไว้</b><p class="hint" id="storage"></p></div>
+  <div id="offList"></div>
+</section>
+
+<!-- แท็บ Spotify -->
+<section id="p-sp" class="page">
+  <form class="card" id="spForm" novalidate>
+    <input class="field" id="spUrl" type="text" inputmode="url" autocomplete="off" placeholder="วางลิงก์เพลย์ลิสต์ / อัลบั้ม / เพลง Spotify">
+    <div class="row">
+      <button class="btn sp" type="submit">＋ เพิ่ม</button>
+      <a class="btn sec" href="https://accounts.spotify.com/login" target="_blank" rel="noopener">🔑 ล็อกอิน</a>
+    </div>
+    <p class="hint">เอาลิงก์: แอป Spotify → เปิดเพลย์ลิสต์ → ⋯ → แชร์ → คัดลอกลิงก์<br>ฟังเต็มเพลงต้องล็อกอิน Spotify ในเบราว์เซอร์นี้ ถ้าไม่ล็อกอินจะได้ฟังเพลงละ 30 วินาที<br>เปลี่ยนเพลง: แตะชื่อเพลงในกรอบ Spotify</p>
+  </form>
+  <div class="card" id="spWrap" hidden>
+    <div class="sp-head"><span class="sp-dot">●</span><b id="spNow"></b><button class="icon" type="button" data-act="spclose">✕</button></div>
+    <div id="spBox"></div>
+  </div>
+  <div id="spList"></div>
+</section>
+
+<!-- ตัวเล่นเพลง -->
+<div class="player">
+  <div class="p-top">
+    <div class="art" id="pArt">♪</div>
+    <div class="meta"><b id="pTitle">ยังไม่ได้เลือกเพลง</b><small id="pSub">เลือกเพลงเพื่อเริ่มฟัง</small></div>
+  </div>
+  <input type="range" id="seek" min="0" max="0" step="0.1" value="0">
+  <div class="time"><span id="cur">0:00</span><span id="dur">0:00</span></div>
+  <div class="ctrl">
+    <button class="icon" id="bShuf" data-act="shuffle">🔀</button>
+    <button class="icon" id="bPrev" data-act="prev">⏮</button>
+    <button class="icon play" id="bPlay" data-act="toggle">▶</button>
+    <button class="icon" id="bNext" data-act="next">⏭</button>
+    <button class="icon" id="bRep" data-act="repeat">🔁</button>
+  </div>
+</div>
+
+<!-- เมนูด้านล่าง -->
+<div id="sheet" class="sheet" hidden>
+  <div class="sheet-box">
+    <b id="sheetTitle"></b>
+    <div id="sheetBtns" style="display:flex;flex-direction:column;gap:8px"></div>
+    <button class="btn sec" style="text-align:center" onclick="closeSheet()">ยกเลิก</button>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<audio id="audio" preload="metadata"></audio>
+
+<script>
+/* ================= ตัวช่วยพื้นฐาน ================= */
+const $ = id => document.getElementById(id);
+const audio = $('audio'), seek = $('seek');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const str = v => Array.isArray(v) ? v.join(', ') : (v || '');
+const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const initial = n => ([...String(n).trim()][0] || '♪').toUpperCase();
+function grad(name){
+  let h = 0; for (const c of String(name)) h = (h * 31 + c.charCodeAt(0)) % 360;
+  return `linear-gradient(135deg,hsl(${h},70%,55%),hsl(${(h + 50) % 360},70%,40%))`;
+}
+function fmt(t){
+  if (!isFinite(t) || t < 0) return '0:00';
+  t = Math.floor(t);
+  const h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), s = String(t % 60).padStart(2, '0');
+  return h ? `${h}:${String(m).padStart(2, '0')}:${s}` : `${m}:${s}`;
+}
+const fmtSize = b => b < 1048576 ? Math.round(b / 1024) + ' KB' : (b / 1048576).toFixed(1) + ' MB';
+let toastTimer;
+function toast(msg){
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+function copyText(t){
+  if (navigator.clipboard && window.isSecureContext)
+    navigator.clipboard.writeText(t).then(() => toast('🔗 คัดลอกลิงก์แล้ว')).catch(() => prompt('คัดลอกลิงก์:', t));
+  else prompt('คัดลอกลิงก์:', t);
+}
+
+/* ================= ฐานข้อมูลเก็บไฟล์เพลง (IndexedDB) ================= */
+let dbPromise = null;
+function openDB(){
+  if (!dbPromise) dbPromise = new Promise((res, rej) => {
+    const r = indexedDB.open('mymusic-db', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('files');
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => { dbPromise = null; rej(r.error); };
+  });
+  return dbPromise;
+}
+async function dbDo(mode, fn){
+  const db = await openDB();
+  return new Promise((res, rej) => {
+    const t = db.transaction('files', mode);
+    const req = fn(t.objectStore('files'));
+    t.oncomplete = () => res(req.result);
+    t.onerror = t.onabort = () => rej(t.error);
+  });
+}
+const dbGet = k => dbDo('readonly', s => s.get(k));
+const dbPut = (k, v) => dbDo('readwrite', s => s.put(v, k));
+const dbDel = k => dbDo('readwrite', s => s.delete(k));
+
+/* ================= ข้อมูลและสถานะ ================= */
+function loadSongs(){
+  try {
+    const d = JSON.parse(localStorage.getItem('mm_songs') || '[]');
+    return Array.isArray(d) ? d.filter(s => s && s.id && s.name) : [];
+  } catch (e) { return []; }
+}
+let songs = loadSongs();
+let set = { shuffle: false, repeat: 'all' };
+try { Object.assign(set, JSON.parse(localStorage.getItem('mm_set') || '{}')); } catch (e) {}
+if (!['off', 'all', 'one'].includes(set.repeat)) set.repeat = 'all';
+set.shuffle = !!set.shuffle;
+
+let curId = null, curBlob = null, playToken = 0, errStreak = 0, dragging = false, dragTimer = null;
+let playHist = [], shuffleBag = [];
+const downloading = {};
+let mode = 'audio';                     // 'audio' = MP3, 'sp' = Spotify
+
+// สถานะ Spotify
+const SP_TYPES = { playlist: 'เพลย์ลิสต์', album: 'อัลบั้ม', track: 'เพลง', artist: 'ศิลปิน', episode: 'พอดแคสต์', show: 'พอดแคสต์' };
+function loadSp(){
+  try {
+    const d = JSON.parse(localStorage.getItem('mm_sp') || '[]');
+    return Array.isArray(d) ? d.filter(p => p && p.id && p.sid && SP_TYPES[p.type]) : [];
+  } catch (e) { return []; }
+}
+let spList = loadSp();
+let spCurId = null, spCtl = null, spApi = null, spApiPromise = null, spCreating = false;
+let spPaused = true, spDur = 0, spUri = '', spIgnoreUntil = 0, spWarned = false;
+
+function save(){
+  try {
+    localStorage.setItem('mm_songs', JSON.stringify(songs));
+    localStorage.setItem('mm_set', JSON.stringify(set));
+  } catch (e) { toast('บันทึกรายการไม่ได้ (พื้นที่เบราว์เซอร์เต็ม)'); }
+}
+function saveSp(){
+  try { localStorage.setItem('mm_sp', JSON.stringify(spList)); }
+  catch (e) { toast('บันทึกรายการ Spotify ไม่ได้'); }
+}
+const byId = id => songs.find(s => s.id === id);
+const spById = id => spList.find(p => p.id === id);
+
+// ย้ายรายการจากเวอร์ชันแรก
+function migrate(){
+  if (localStorage.getItem('mm_songs')) return;
+  try {
+    const old = JSON.parse(localStorage.getItem('songs') || '[]');
+    if (Array.isArray(old)) old.forEach(o => {
+      if (o && o.url && !o.local) addSong({ name: o.name, url: o.url, type: 'link' });
+    });
+  } catch (e) {}
+  save();
+}
+
+function addSong(d){
+  if (d.url){
+    const dup = songs.find(s => s.url === d.url);
+    if (dup) return { song: dup, isNew: false };
+  }
+  const s = { id: newId(), name: d.name || 'ไม่มีชื่อ', artist: d.artist || '', url: d.url || '',
+              type: d.type || 'link', cover: d.cover || '', offline: false, size: 0 };
+  songs.push(s);
+  if (set.shuffle) shuffleBag.splice(Math.floor(Math.random() * (shuffleBag.length + 1)), 0, s.id);
+  return { song: s, isNew: true };
+}
+
+/* ================= เพิ่มเพลงจากลิงก์ / ไฟล์ ================= */
+function fixLink(raw){
+  let u; try { u = new URL(raw); } catch (e) { return null; }
+  if (!/^https?:$/.test(u.protocol)) return null;
+  if (u.hostname.endsWith('drive.google.com')){
+    const m = u.pathname.match(/\/file\/d\/([\w-]+)/);
+    const id = m ? m[1] : u.searchParams.get('id');
+    if (id) return 'https://drive.google.com/uc?export=download&id=' + id;
+  }
+  if (u.hostname.endsWith('dropbox.com')){ u.searchParams.delete('dl'); u.searchParams.set('raw', '1'); }
+  return u.href;
+}
+function guessName(url){
+  if (url.includes('drive.google.com')) return 'เพลงจาก Google Drive ' + (songs.length + 1);
+  try {
+    const seg = decodeURIComponent(new URL(url).pathname.split('/').filter(Boolean).pop() || '');
+    const n = seg.replace(/\.[a-z0-9]{2,4}$/i, '').replace(/[_+]/g, ' ').trim();
+    if (n) return n;
+  } catch (e) {}
+  return 'เพลง ' + (songs.length + 1);
+}
+const isSpotifyLink = raw => /spotify\.com|spotify\.link|spoti\.fi|^spotify:/i.test(raw);
+
+$('addForm').onsubmit = e => {
+  e.preventDefault();
+  const raw = $('url').value.trim();
+  if (!raw) return toast('กรุณาวางลิงก์เพลง');
+  if (isSpotifyLink(raw)){
+    if (addSpotify(raw, $('name').value.trim())){ $('url').value = ''; $('name').value = ''; showTab('sp'); }
+    return;
+  }
+  const url = fixLink(raw);
+  if (!url) return toast('ลิงก์ไม่ถูกต้อง ต้องขึ้นต้นด้วย http:// หรือ https://');
+  const { song, isNew } = addSong({ name: $('name').value.trim() || guessName(url), url, type: 'link' });
+  if (!isNew) return toast('มีเพลงนี้ในคลังแล้ว: ' + song.name);
+  save(); render();
+  toast(url.startsWith('http:') ? '⚠️ เพิ่มแล้ว แต่ลิงก์ http อาจเล่นไม่ได้' : '✅ เพิ่มแล้ว: ' + song.name);
+  $('url').value = ''; $('name').value = '';
+};
+
+$('fileIn').onchange = async e => {
+  const files = [...e.target.files];
+  e.target.value = '';
+  let ok = 0;
+  for (const f of files){
+    if (!/^audio\//.test(f.type) && !/\.(mp3|m4a|aac|wav|ogg|oga|flac|opus)$/i.test(f.name)){
+      toast('ข้ามไฟล์ที่ไม่ใช่เพลง: ' + f.name); continue;
+    }
+    const { song } = addSong({ name: f.name.replace(/\.[^.]+$/, ''), artist: 'ไฟล์ในเครื่อง', type: 'local' });
+    try { await dbPut(song.id, f); song.offline = true; song.size = f.size; ok++; }
+    catch (err){ songs = songs.filter(s => s !== song); shuffleBag = shuffleBag.filter(x => x !== song.id); toast('เก็บไฟล์ไม่ได้ (พื้นที่อาจเต็ม): ' + f.name); }
+  }
+  save(); render();
+  if (ok) toast(`✅ เพิ่ม ${ok} ไฟล์แล้ว`);
+};
+
+/* ================= แสดงผล ================= */
+const artInner = s => esc(initial(s.name)) + (s.cover ? `<img src="${esc(s.cover)}" loading="lazy" alt="" onerror="this.remove()">` : '');
+const artBox = s => `<div class="art" style="background:${grad(s.name)}">${artInner(s)}</div>`;
+
+function songRow(s){
+  const d = downloading[s.id];
+  let dl = '';
+  if (d !== undefined) dl = `<span class="pct">${esc(d)}</span>`;
+  else if (!s.offline && s.url) dl = `<button class="icon ghost" data-act="dl" data-id="${s.id}">⬇</button>`;
+  const sub = s.artist || (s.type === 'online' ? 'Internet Archive' : 'ลิงก์ออนไลน์');
+  return `<div class="item ${s.id === curId && mode === 'audio' ? 'active' : ''}" data-act="play" data-id="${s.id}">
+    ${artBox(s)}
+    <div class="meta"><b>${esc(s.name)}</b><small>${esc(sub)}${s.offline ? '<span class="badge">ออฟไลน์</span>' : ''}</small></div>
+    ${dl}<button class="icon ghost" data-act="more" data-id="${s.id}">⋮</button>
+  </div>`;
+}
+function render(){
+  const f = $('filter').value.trim().toLowerCase();
+  const lib = songs.filter(s => !f || (s.name + ' ' + s.artist).toLowerCase().includes(f));
+  $('libList').innerHTML = lib.length ? lib.map(songRow).join('')
+    : `<div class="empty">${songs.length ? 'ไม่พบเพลงที่ค้นหา' : 'ยังไม่มีเพลง<br>วางลิงก์ด้านบน หรือไปที่แท็บ 🔍 ออนไลน์'}</div>`;
+  const off = songs.filter(s => s.offline);
+  $('offList').innerHTML = off.length ? off.map(songRow).join('')
+    : '<div class="empty">ยังไม่มีเพลงออฟไลน์<br>กด ⬇ ที่เพลงเพื่อโหลดเก็บไว้</div>';
+  const total = off.reduce((a, s) => a + (s.size || 0), 0);
+  $('storage').textContent = `${off.length} เพลง • ${fmtSize(total)} • ฟังได้แม้ไม่มีอินเทอร์เน็ต`;
+  $('count').textContent = `${songs.length} เพลง • ${spList.length} Spotify`;
+  syncButtons();
+}
+let renderTimer = null;
+function renderSoon(){ if (!renderTimer) renderTimer = setTimeout(() => { renderTimer = null; render(); }, 300); }
+
+function renderSp(){
+  $('spList').innerHTML = spList.length ? spList.map(p => `
+    <div class="item ${p.id === spCurId && mode === 'sp' ? 'active' : ''}" data-act="spplay" data-id="${p.id}">
+      ${artBox(p)}
+      <div class="meta"><b>${esc(p.name)}</b><small><span class="sp-dot">●</span> Spotify • ${SP_TYPES[p.type]}</small></div>
+      <button class="icon ghost" data-act="spmore" data-id="${p.id}">⋮</button>
+    </div>`).join('')
+    : '<div class="empty">ยังไม่มีเพลย์ลิสต์ Spotify<br>คัดลอกลิงก์จากแอป Spotify แล้ววางด้านบน</div>';
+  $('count').textContent = `${songs.length} เพลง • ${spList.length} Spotify`;
+}
+
+function updateNow(){
+  const art = $('pArt');
+  if (mode === 'sp'){
+    const p = spById(spCurId);
+    $('pTitle').textContent = p ? p.name : 'Spotify';
+    $('pSub').textContent = 'Spotify • ' + (p ? SP_TYPES[p.type] : '');
+    art.style.background = p ? grad(p.name) : '';
+    art.innerHTML = p ? artInner(p) : '♪';
+    return;
+  }
+  const s = byId(curId);
+  $('pTitle').textContent = s ? s.name : 'ยังไม่ได้เลือกเพลง';
+  $('pSub').textContent = s ? (s.artist || (s.offline ? 'เล่นจากไฟล์ออฟไลน์' : 'สตรีมออนไลน์')) : 'เลือกเพลงเพื่อเริ่มฟัง';
+  art.style.background = s ? grad(s.name) : '';
+  art.innerHTML = s ? artInner(s) : '♪';
+}
+function syncButtons(){
+  const sp = mode === 'sp';
+  $('bPlay').textContent = (sp ? spPaused : audio.paused) ? '▶' : '⏸';
+  $('bShuf').classList.toggle('on', set.shuffle && !sp);
+  $('bRep').textContent = set.repeat === 'one' ? '🔂' : '🔁';
+  $('bRep').classList.toggle('on', set.repeat !== 'off' && !sp);
+  $('bRep').classList.toggle('dim', set.repeat === 'off' || sp);
+  ['bShuf', 'bPrev', 'bNext'].forEach(i => $(i).classList.toggle('dim', sp));
+}
+function showTab(t){
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('on', p.id === 'p-' + t));
+  window.scrollTo(0, 0);
+}
+
+/* ================= สลับโหมด MP3 / Spotify ================= */
+function resetTime(){
+  seek.max = 0; seek.value = 0; seek.disabled = false;
+  $('cur').textContent = '0:00'; $('dur').textContent = '0:00'; paintSeek();
+}
+function paintSeek(){
+  const max = +seek.max;
+  seek.style.setProperty('--p', (max > 0 ? seek.value / max * 100 : 0) + '%');
+}
+function setMode(m){
+  if (mode === m) return;
+  mode = m;
+  if (m === 'audio'){
+    const d = audio.duration, ok = isFinite(d) && d > 0;
+    seek.max = ok ? d : 0; seek.disabled = !ok;
+    seek.value = audio.currentTime || 0;
+    $('cur').textContent = fmt(audio.currentTime); $('dur').textContent = ok ? fmt(d) : '0:00';
+    paintSeek();
+  } else resetTime();
+  updateNow(); render(); renderSp();
+}
+
+/* ================= การเล่นเพลง MP3 ================= */
+async function playId(id, addHist = true){
+  const s = byId(id); if (!s) return;
+  const token = ++playToken;
+  spPause();
+  setMode('audio');
+  if (addHist && curId && curId !== id){ playHist.push(curId); if (playHist.length > 100) playHist.shift(); }
+  curId = id;
+  resetTime(); updateNow(); render();
+
+  let src = s.url;
+  if (s.offline){
+    try {
+      const blob = await dbGet(id);
+      if (blob) src = URL.createObjectURL(blob);
+      else { s.offline = false; s.size = 0; save(); render(); }
+    } catch (e) {}
+  }
+  if (token !== playToken){ if (src && src.startsWith('blob:')) URL.revokeObjectURL(src); return; }
+  if (!src) return toast('ไม่พบไฟล์เพลงนี้แล้ว กรุณาเพิ่มใหม่');
+
+  if (curBlob) URL.revokeObjectURL(curBlob);
+  curBlob = src.startsWith('blob:') ? src : null;
+  audio.src = src;
+  updateMediaMeta(s);
+  audio.play().catch(e => { if (e.name === 'NotAllowedError') toast('แตะปุ่ม ▶ เพื่อเริ่มเล่น'); });
+}
+
+function togglePlay(){
+  if (!curId || !byId(curId)){
+    if (songs.length) playId(songs[0].id); else toast('ยังไม่มีเพลงในคลัง');
+    return;
+  }
+  if (!audio.getAttribute('src')) return playId(curId, false);
+  audio.paused ? audio.play().catch(() => toast('เล่นไม่ได้ ลองเลือกเพลงใหม่')) : audio.pause();
+}
+
+function refillBag(){
+  shuffleBag = songs.map(s => s.id).filter(x => x !== curId);
+  for (let i = shuffleBag.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffleBag[i], shuffleBag[j]] = [shuffleBag[j], shuffleBag[i]];
+  }
+}
+function stopAtEnd(){ audio.pause(); audio.currentTime = 0; toast('จบเพลย์ลิสต์แล้ว'); }
+
+function next(auto = false){
+  if (!songs.length) return;
+  let id;
+  if (set.shuffle){
+    shuffleBag = shuffleBag.filter(x => x !== curId && byId(x));
+    if (!shuffleBag.length){
+      if (auto && set.repeat === 'off') return stopAtEnd();
+      refillBag();
+    }
+    id = shuffleBag.shift() || curId;
+  } else {
+    const i = songs.findIndex(s => s.id === curId);
+    if (auto && set.repeat === 'off' && i === songs.length - 1) return stopAtEnd();
+    id = songs[(i + 1) % songs.length].id;
+  }
+  playId(id);
+}
+function prev(){
+  if (audio.currentTime > 3){ audio.currentTime = 0; return; }
+  if (!songs.length) return;
+  let id = null;
+  if (set.shuffle){
+    while (playHist.length && !id){ const h = playHist.pop(); if (byId(h)) id = h; }
+  }
+  if (!id){
+    const i = songs.findIndex(s => s.id === curId);
+    id = songs[i <= 0 ? songs.length - 1 : i - 1].id;
+  }
+  playId(id, false);
+}
+function toggleShuffle(){
+  set.shuffle = !set.shuffle; playHist = [];
+  if (set.shuffle) refillBag(); else shuffleBag = [];
+  save(); syncButtons(); toast(set.shuffle ? '🔀 สุ่มเพลง: เปิด' : 'สุ่มเพลง: ปิด');
+}
+function cycleRepeat(){
+  set.repeat = { off: 'all', all: 'one', one: 'off' }[set.repeat] || 'all';
+  audio.loop = set.repeat === 'one';
+  save(); syncButtons();
+  toast({ off: 'ไม่วนซ้ำ', all: '🔁 วนทั้งรายการ', one: '🔂 วนเพลงเดียว' }[set.repeat]);
+}
+
+// เหตุการณ์ของตัวเล่น MP3
+audio.ontimeupdate = () => {
+  if (dragging || mode !== 'audio') return;
+  seek.value = audio.currentTime; $('cur').textContent = fmt(audio.currentTime); paintSeek();
+};
+audio.onloadedmetadata = audio.ondurationchange = () => {
+  if (mode !== 'audio') return;
+  const d = audio.duration, ok = isFinite(d) && d > 0;
+  seek.max = ok ? d : 0; seek.disabled = !ok;
+  $('dur').textContent = ok ? fmt(d) : 'LIVE';
+  paintSeek(); updatePos();
+};
+audio.onplay = () => { spPause(); setMode('audio'); syncButtons(); setMS('playing'); };
+audio.onpause = () => { syncButtons(); setMS('paused'); };
+audio.onplaying = () => { errStreak = 0; if (mode === 'audio') updateNow(); };
+audio.onwaiting = () => { if (mode === 'audio') $('pSub').textContent = '⏳ กำลังโหลด...'; };
+audio.onseeked = updatePos;
+audio.onended = () => { if (mode === 'audio') next(true); };
+audio.onerror = () => {
+  if (mode !== 'audio' || !curId || !audio.getAttribute('src')) return;
+  const s = byId(curId), tk = playToken;
+  toast('❌ เล่นไม่ได้: ' + (s ? s.name : '') + ' (ลิงก์อาจเสีย หรือไม่ได้แชร์สาธารณะ)');
+  syncButtons();
+  errStreak++;
+  if (songs.length > 1 && errStreak < songs.length)
+    setTimeout(() => { if (tk === playToken && mode === 'audio') next(true); }, 1500);
+};
+
+// แถบเวลา (ใช้ร่วมกันทั้ง MP3 และ Spotify)
+seek.oninput = () => { dragging = true; $('cur').textContent = fmt(+seek.value); paintSeek(); };
+seek.onchange = () => {
+  const v = +seek.value;
+  if (mode === 'sp'){ if (spCtl && spDur > 0) try { spCtl.seek(v); } catch (e) {} }
+  else if (isFinite(audio.duration)) audio.currentTime = v;
+  dragging = false;
+};
+['pointerup', 'pointercancel', 'touchend', 'touchcancel'].forEach(ev => seek.addEventListener(ev, () => {
+  clearTimeout(dragTimer); dragTimer = setTimeout(() => { dragging = false; }, 400);
+}));
+
+// ปุ่มควบคุมบนหน้าจอล็อก
+function updateMediaMeta(s){
+  if (!('mediaSession' in navigator)) return;
+  try {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: s.name, artist: s.artist || 'My Music', artwork: s.cover ? [{ src: s.cover }] : []
+    });
+  } catch (e) {}
+}
+function setMS(state){ if ('mediaSession' in navigator) navigator.mediaSession.playbackState = state; updatePos(); }
+function updatePos(){
+  if (mode !== 'audio' || !('mediaSession' in navigator) || !navigator.mediaSession.setPositionState) return;
+  const d = audio.duration;
+  try {
+    if (isFinite(d) && d > 0)
+      navigator.mediaSession.setPositionState({ duration: d, playbackRate: audio.playbackRate || 1, position: Math.min(audio.currentTime, d) });
+  } catch (e) {}
+}
+if ('mediaSession' in navigator){
+  [['play', () => { if (mode === 'sp'){ if (spCtl) spCtl.resume(); } else audio.play().catch(() => {}); }],
+   ['pause', () => { if (mode === 'sp') spPause(); else audio.pause(); }],
+   ['nexttrack', () => { if (mode === 'audio') next(); }],
+   ['previoustrack', () => { if (mode === 'audio') prev(); }],
+   ['seekto', d => {
+     if (mode === 'sp'){ if (spCtl) spCtl.seek(d.seekTime); }
+     else if (isFinite(audio.duration)) audio.currentTime = d.seekTime;
+   }]
+  ].forEach(([a, h]) => { try { navigator.mediaSession.setActionHandler(a, h); } catch (e) {} });
+}
+
+/* ================= Spotify ================= */
+function parseSpotify(raw){
+  const m = String(raw).trim().match(/(?:open\.spotify\.com\/(?:intl-[a-z-]+\/)?(?:embed\/)?|spotify:)(playlist|album|track|artist|episode|show)[\/:]([A-Za-z0-9]{22})/i);
+  return m ? { type: m[1].toLowerCase(), sid: m[2] } : null;
+}
+const spWeb = p => `https://open.spotify.com/${p.type}/${p.sid}`;
+const spUriOf = p => `spotify:${p.type}:${p.sid}`;
+
+function addSpotify(raw, name){
+  if (/(spotify\.link|spoti\.fi)\//i.test(raw)){
+    toast('ลิงก์ย่อใช้ไม่ได้: เปิดลิงก์ในเบราว์เซอร์ก่อน แล้วคัดลอกลิงก์เต็ม (open.spotify.com/...)');
+    return false;
+  }
+  const info = parseSpotify(raw);
+  if (!info){ toast('ไม่ใช่ลิงก์ Spotify ที่รองรับ (เพลย์ลิสต์ / อัลบั้ม / เพลง / ศิลปิน / พอดแคสต์)'); return false; }
+  const dup = spList.find(p => p.type === info.type && p.sid === info.sid);
+  if (dup){ toast('มีในรายการแล้ว: ' + dup.name); return true; }
+  const p = { id: newId(), type: info.type, sid: info.sid, name: name || SP_TYPES[info.type] + ' Spotify', cover: '', auto: !name };
+  spList.unshift(p); saveSp(); renderSp();
+  toast('✅ เพิ่มแล้ว แตะเพื่อเล่น');
+  fetchSpMeta(p.id);
+  return true;
+}
+async function fetchSpMeta(id){
+  const p = spById(id); if (!p) return;
+  try {
+    const r = await fetch('https://open.spotify.com/oembed?url=' + encodeURIComponent(spWeb(p)));
+    if (!r.ok) return;
+    const d = await r.json();
+    const cur = spById(id); if (!cur) return;
+    if (d.thumbnail_url) cur.cover = d.thumbnail_url;
+    if (cur.auto && d.title) cur.name = d.title;
+    saveSp(); renderSp();
+    if (id === spCurId){ $('spNow').textContent = cur.name; if (mode === 'sp') updateNow(); }
+  } catch (e) {}   // ดึงชื่อไม่ได้ก็ไม่เป็นไร เปลี่ยนชื่อเองได้
+}
+
+$('spForm').onsubmit = e => {
+  e.preventDefault();
+  const raw = $('spUrl').value.trim();
+  if (!raw) return toast('กรุณาวางลิงก์ Spotify');
+  if (addSpotify(raw, '')) $('spUrl').value = '';
+};
+
+function loadSpApi(){
+  if (spApi) return Promise.resolve(spApi);
+  if (spApiPromise) return spApiPromise;
+  spApiPromise = new Promise((res, rej) => {
+    window.onSpotifyIframeApiReady = api => { spApi = api; res(api); };
+    const sc = document.createElement('script');
+    sc.src = 'https://open.spotify.com/embed/iframe-api/v1';
+    sc.async = true;
+    sc.onerror = () => rej(new Error('load'));
+    document.head.appendChild(sc);
+    setTimeout(() => rej(new Error('timeout')), 20000);
+  }).catch(e => { spApiPromise = null; throw e; });
+  return spApiPromise;
+}
+
+function spLoad(p){
+  if (!spCtl || !p) return;
+  const uri = spUriOf(p);
+  try {
+    if (uri !== spUri){ spCtl.loadUri(uri); spUri = uri; }
+    spCtl.play();
+  } catch (e) {}
+}
+function spPause(){
+  if (!spCtl) return;
+  spIgnoreUntil = Date.now() + 1500;     // กันสถานะ "กำลังเล่น" ที่ค้างมาจาก Spotify
+  spPaused = true;
+  try { spCtl.pause(); } catch (e) {}
+}
+function spToggle(){
+  if (!spCtl) return toast('⏳ กำลังโหลดตัวเล่น Spotify...');
+  spIgnoreUntil = 0;
+  try { spCtl.togglePlay(); } catch (e) {}
+}
+const spHint = () => toast('โหมด Spotify: แตะชื่อเพลงในกรอบ Spotify เพื่อเลือกหรือข้ามเพลง');
+
+async function spPlay(id){
+  const p = spById(id); if (!p) return;
+  if (id === spCurId && spCtl && mode === 'sp') return spToggle();
+  audio.pause();
+  spCurId = id; spPaused = true; spDur = 0; spIgnoreUntil = 0;
+  $('spWrap').hidden = false; $('spNow').textContent = p.name;
+  setMode('sp'); resetTime(); updateNow(); syncButtons(); renderSp();
+  if (spCtl) return spLoad(p);
+  if (spCreating) return;               // กำลังสร้างตัวเล่นอยู่ เดี๋ยวโหลดรายการล่าสุดให้เอง
+  spCreating = true;
+  try {
+    const api = await loadSpApi();
+    const first = spById(spCurId);
+    if (!first){ spCreating = false; return; }
+    const el = document.createElement('div');
+    $('spBox').replaceChildren(el);
+    const firstUri = spUriOf(first);
+    setTimeout(() => {
+      if (spCreating && !spCtl){ spCreating = false; toast('ตัวเล่น Spotify ไม่ตอบสนอง ลองใหม่อีกครั้ง'); spClose(); }
+    }, 20000);
+    api.createController(el, { uri: firstUri, width: '100%', height: 380 }, ctl => {
+      spCtl = ctl; spCreating = false; spUri = firstUri;
+      ctl.addListener('ready', () => { const cur = spById(spCurId); if (cur && mode === 'sp') spLoad(cur); });
+      ctl.addListener('playback_update', e => spUpdate(e && e.data));
+    });
+  } catch (e){
+    spCreating = false;
+    toast('โหลดตัวเล่น Spotify ไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่');
+    spClose();
+  }
+}
+
+function spUpdate(d){
+  if (!d || !spCurId) return;
+  const playing = !d.isPaused;
+  if (playing && Date.now() < spIgnoreUntil) return;
+  const changed = spPaused === playing;
+  spPaused = !playing;
+  spDur = (+d.duration || 0) / 1000;
+  if (playing){
+    if (!audio.paused) audio.pause();
+    setMode('sp');
+  }
+  if (mode === 'sp'){
+    if (!dragging){
+      const pos = Math.min((+d.position || 0) / 1000, spDur || Infinity);
+      seek.max = spDur > 0 ? spDur : 0; seek.disabled = !(spDur > 0);
+      seek.value = pos; $('cur').textContent = fmt(pos); $('dur').textContent = fmt(spDur);
+      paintSeek();
+    }
+    const p = spById(spCurId);
+    $('pSub').textContent = d.isBuffering ? '⏳ กำลังโหลด...' : 'Spotify • ' + (p ? SP_TYPES[p.type] : '');
+    if (playing && !spWarned && spDur > 25 && spDur <= 31){
+      spWarned = true;
+      toast('ได้ยินแค่ 30 วินาที? กดปุ่ม 🔑 ล็อกอิน ในแท็บ Spotify');
+    }
+  }
+  if (changed) syncButtons();
+}
+
+function spClose(){
+  spPause();
+  spCurId = null;
+  $('spWrap').hidden = true;
+  if (mode === 'sp') setMode('audio');
+  renderSp(); syncButtons();
+}
+function spRename(id){
+  const p = spById(id); if (!p) return;
+  const n = prompt('ตั้งชื่อใหม่', p.name);
+  if (n && n.trim()){
+    p.name = n.trim(); p.auto = false; saveSp(); renderSp();
+    if (id === spCurId){ $('spNow').textContent = p.name; if (mode === 'sp') updateNow(); }
+  }
+}
+function spDelete(id){
+  const p = spById(id); if (!p) return;
+  if (!confirm(`ลบ "${p.name}" ออกจากรายการ?`)) return;
+  if (id === spCurId) spClose();
+  spList = spList.filter(x => x.id !== id);
+  saveSp(); renderSp();
+}
+function openSpSheet(id){
+  const p = spById(id); if (!p) return;
+  $('sheetTitle').textContent = p.name;
+  const b = [['spapp', '🟢 เปิดในแอป Spotify'], ['spcopy', '🔗 คัดลอกลิงก์'], ['spren', '✏️ เปลี่ยนชื่อ'], ['spdel', '❌ ลบออกจากรายการ']];
+  $('sheetBtns').innerHTML = b.map(([a, t]) => `<button class="btn sec" data-act="${a}" data-id="${id}">${t}</button>`).join('');
+  $('sheet').hidden = false;
+}
+
+/* ================= ระบบดาวน์โหลด (เฉพาะ MP3) ================= */
+async function fetchBlob(url, onProg){
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const type = res.headers.get('content-type') || '';
+  if (type.includes('text/html')) throw new Error('html');
+  const total = +res.headers.get('content-length') || 0;
+  const mime = type.startsWith('audio/') ? type : 'audio/mpeg';
+  if (!res.body || !res.body.getReader) return new Blob([await res.blob()], { type: mime });
+  const reader = res.body.getReader(), chunks = [];
+  let got = 0;
+  while (true){
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value); got += value.length;
+    onProg(total ? Math.min(99, Math.round(got / total * 100)) + '%' : fmtSize(got));
+  }
+  return new Blob(chunks, { type: mime });
+}
+
+async function saveOffline(id){
+  const s = byId(id);
+  if (!s || s.offline || !s.url || downloading[id] !== undefined) return;
+  downloading[id] = '0%'; render();
+  try {
+    if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+    const blob = await fetchBlob(s.url, p => { downloading[id] = p; renderSoon(); });
+    if (!byId(id)) return;
+    await dbPut(id, blob);
+    if (!byId(id)){ dbDel(id).catch(() => {}); return; }
+    s.offline = true; s.size = blob.size; save();
+    toast('✅ โหลดเก็บแล้ว: ' + s.name);
+  } catch (e) {
+    toast(e && e.name === 'QuotaExceededError' ? 'พื้นที่เก็บข้อมูลเต็ม'
+      : 'โหลดไม่ได้ — เว็บต้นทางไม่อนุญาตให้ดาวน์โหลด (ยังฟังแบบสตรีมได้)');
+  } finally { delete downloading[id]; render(); }
+}
+
+async function removeOffline(id){
+  const s = byId(id); if (!s) return;
+  try { await dbDel(id); } catch (e) {}
+  s.offline = false; s.size = 0; save(); render(); toast('ลบไฟล์ออฟไลน์แล้ว');
+}
+
+async function saveToDevice(id){
+  const s = byId(id); if (!s) return;
+  let blob = null;
+  try { if (s.offline) blob = await dbGet(id); } catch (e) {}
+  if (!blob && s.url){
+    toast('⏳ กำลังเตรียมไฟล์...');
+    try { blob = await fetchBlob(s.url, () => {}); }
+    catch (e){
+      const w = window.open(s.url, '_blank');
+      toast(w ? 'เปิดไฟล์ในแท็บใหม่แล้ว — กดค้าง/เมนู ⋮ เพื่อดาวน์โหลด' : 'เบราว์เซอร์บล็อกหน้าต่างใหม่ ลองใช้ "คัดลอกลิงก์" แทน');
+      return;
+    }
+  }
+  if (!blob) return toast('ไม่พบไฟล์');
+  const ext = /mp4|m4a|aac/.test(blob.type) ? '.m4a' : /ogg/.test(blob.type) ? '.ogg'
+            : /wav/.test(blob.type) ? '.wav' : /flac/.test(blob.type) ? '.flac' : '.mp3';
+  const u = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = u; a.download = s.name.replace(/[\\/:*?"<>|]+/g, '_') + ext;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(u), 15000);
+}
+
+/* ================= ค้นหาเพลงออนไลน์ (Internet Archive) ================= */
+let onlineTracks = {}, otk = 0, searchToken = 0;
+
+$('searchForm').onsubmit = async e => {
+  e.preventDefault();
+  const q = $('q').value.replace(/[+\-!(){}[\]^"~*?:\\/&|]/g, ' ').trim();
+  if (!q) return toast('พิมพ์คำที่ต้องการค้นหา');
+  $('q').blur();
+  const box = $('results'), tk = ++searchToken;
+  box.innerHTML = '<div class="empty">⏳ กำลังค้นหา...</div>';
+  onlineTracks = {};
+  try {
+    const url = 'https://archive.org/advancedsearch.php?q=' + encodeURIComponent(`(${q}) AND mediatype:(audio)`)
+      + '&fl[]=identifier&fl[]=title&fl[]=creator&rows=30&output=json';
+    const res = await fetch(url);
+    if (!res.ok) throw 0;
+    const data = await res.json();
+    if (tk !== searchToken) return;
+    const docs = (data.response && data.response.docs) || [];
+    box.innerHTML = docs.length ? docs.map(d => {
+      const title = str(d.title) || d.identifier, by = str(d.creator) || 'ไม่ระบุศิลปิน';
+      return `<div class="item" data-act="open" data-ident="${esc(d.identifier)}">
+        <div class="art" style="background:${grad(title)}">${esc(initial(title))}
+          <img src="https://archive.org/services/img/${encodeURIComponent(d.identifier)}" loading="lazy" alt="" onerror="this.remove()"></div>
+        <div class="meta"><b>${esc(title)}</b><small>${esc(by)}</small></div>
+        <span class="icon ghost">›</span>
+      </div><div class="tracks" hidden></div>`;
+    }).join('') : '<div class="empty">ไม่พบผลลัพธ์ ลองใช้คำภาษาอังกฤษ</div>';
+  } catch (err){
+    if (tk === searchToken) box.innerHTML = '<div class="empty">❌ ค้นหาไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่</div>';
+  }
+};
+
+async function openItem(ident, box){
+  if (!box || box.dataset.busy) return;
+  if (box.dataset.loaded){ box.hidden = !box.hidden; return; }
+  box.hidden = false; box.dataset.busy = 1;
+  box.innerHTML = '<p class="hint" style="padding:8px">⏳ กำลังโหลดรายชื่อเพลง...</p>';
+  try {
+    const res = await fetch('https://archive.org/metadata/' + encodeURIComponent(ident));
+    if (!res.ok) throw 0;
+    const data = await res.json();
+    let files = (data.files || []).filter(f => /\.mp3$/i.test(f.name));
+    const hq = files.filter(f => !/_64kb\.mp3$/i.test(f.name));
+    if (hq.length) files = hq;
+    files = files.slice(0, 80);
+    const by = str(data.metadata && data.metadata.creator);
+    const cover = 'https://archive.org/services/img/' + encodeURIComponent(ident);
+    const base = 'https://archive.org/download/' + encodeURIComponent(ident) + '/';
+    box.innerHTML = files.length ? files.map(f => {
+      const k = 't' + (++otk);
+      const name = str(f.title) || f.name.split('/').pop().replace(/\.mp3$/i, '');
+      const len = isFinite(+f.length) ? fmt(+f.length) : (f.length || '');
+      onlineTracks[k] = { name, artist: str(f.artist) || str(f.creator) || by,
+                          url: base + f.name.split('/').map(encodeURIComponent).join('/'), cover };
+      return `<div class="item"><div class="meta"><b>${esc(name)}</b><small>${esc(len)}</small></div>
+        <button class="icon" data-act="oplay" data-k="${k}">▶</button>
+        <button class="icon" data-act="oadd" data-k="${k}">＋</button>
+        <button class="icon" data-act="odl" data-k="${k}">⬇</button></div>`;
+    }).join('') : '<p class="hint" style="padding:8px">อัลบั้มนี้ไม่มีไฟล์ mp3</p>';
+    box.dataset.loaded = 1;
+  } catch (e){
+    box.innerHTML = '<p class="hint" style="padding:8px">❌ โหลดไม่ได้ แตะอีกครั้งเพื่อลองใหม่</p>';
+  } finally { delete box.dataset.busy; }
+}
+
+function addFromOnline(k, notify){
+  const t = onlineTracks[k]; if (!t) return null;
+  const { song, isNew } = addSong({ ...t, type: 'online' });
+  if (isNew) save();
+  render();
+  if (notify) toast(isNew ? '✅ เพิ่มเข้าคลังแล้ว' : 'มีเพลงนี้ในคลังแล้ว');
+  return song;
+}
+
+/* ================= เมนูเพลง MP3 ================= */
+function openSheet(id){
+  const s = byId(id); if (!s) return;
+  $('sheetTitle').textContent = s.name;
+  const b = [['sdev', '💾 บันทึกไฟล์ลงเครื่อง']];
+  if (!s.offline && s.url) b.push(['dl', '⬇ โหลดไว้ฟังออฟไลน์']);
+  if (s.offline && s.type !== 'local') b.push(['soff', '🗑 ลบไฟล์ออฟไลน์ (เก็บลิงก์ไว้)']);
+  if (s.url) b.push(['scopy', '🔗 คัดลอกลิงก์']);
+  b.push(['sren', '✏️ เปลี่ยนชื่อ'], ['sdel', '❌ ลบเพลงออกจากคลัง']);
+  $('sheetBtns').innerHTML = b.map(([a, t]) => `<button class="btn sec" data-act="${a}" data-id="${id}">${t}</button>`).join('');
+  $('sheet').hidden = false;
+}
+function closeSheet(){ $('sheet').hidden = true; }
+$('sheet').addEventListener('click', e => { if (e.target === $('sheet')) closeSheet(); });
+
+function renameSong(id){
+  const s = byId(id); if (!s) return;
+  const n = prompt('ชื่อเพลงใหม่', s.name);
+  if (n && n.trim()){ s.name = n.trim(); save(); render(); if (id === curId){ if (mode === 'audio') updateNow(); updateMediaMeta(s); } }
+}
+function deleteSong(id){
+  const s = byId(id); if (!s) return;
+  if (!confirm(`ลบ "${s.name}" ออกจากคลัง?`)) return;
+  if (id === curId){
+    playToken++;
+    audio.pause(); audio.removeAttribute('src'); audio.load();
+    if (curBlob){ URL.revokeObjectURL(curBlob); curBlob = null; }
+    curId = null;
+    if (mode === 'audio'){ resetTime(); updateNow(); }
+  }
+  songs = songs.filter(x => x.id !== id);
+  playHist = playHist.filter(x => x !== id);
+  shuffleBag = shuffleBag.filter(x => x !== id);
+  delete downloading[id];
+  save(); render();
+  dbDel(id).catch(() => {});
+}
+
+/* ================= รับการแตะทั้งหมด ================= */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const { act, id, k, ident } = el.dataset;
+  if (el.closest('#sheet')) closeSheet();
+  switch (act){
+    case 'tab': showTab(el.dataset.tab); break;
+    case 'play':
+      errStreak = 0;
+      if (id === curId && audio.getAttribute('src')) mode === 'audio' ? togglePlay() : audio.play().catch(() => {});
+      else playId(id);
+      break;
+    case 'more': openSheet(id); break;
+    case 'dl': saveOffline(id); break;
+    case 'sdev': saveToDevice(id); break;
+    case 'soff': removeOffline(id); break;
+    case 'scopy': { const s = byId(id); if (s && s.url) copyText(s.url); break; }
+    case 'sren': renameSong(id); break;
+    case 'sdel': deleteSong(id); break;
+    case 'open': openItem(ident, el.nextElementSibling); break;
+    case 'oplay': { const s = addFromOnline(k); if (s){ errStreak = 0; playId(s.id); } break; }
+    case 'oadd': addFromOnline(k, true); break;
+    case 'odl': { const s = addFromOnline(k); if (s) saveOffline(s.id); break; }
+    case 'spplay': spPlay(id); break;
+    case 'spmore': openSpSheet(id); break;
+    case 'spapp': { const p = spById(id); if (p) window.open(spWeb(p), '_blank'); break; }
+    case 'spcopy': { const p = spById(id); if (p) copyText(spWeb(p)); break; }
+    case 'spren': spRename(id); break;
+    case 'spdel': spDelete(id); break;
+    case 'spclose': spClose(); break;
+    case 'toggle': mode === 'sp' ? spToggle() : togglePlay(); break;
+    case 'next': mode === 'sp' ? spHint() : next(); break;
+    case 'prev': mode === 'sp' ? spHint() : prev(); break;
+    case 'shuffle': mode === 'sp' ? spHint() : toggleShuffle(); break;
+    case 'repeat': mode === 'sp' ? spHint() : cycleRepeat(); break;
+  }
+});
+$('filter').oninput = render;
+
+/* ================= เริ่มต้น ================= */
+migrate();
+audio.loop = set.repeat === 'one';
+if (set.shuffle) refillBag();
+render(); renderSp(); updateNow();
+</script>
+</body>
+</html>
